@@ -62,7 +62,7 @@ docker run -d \
   -v "$(pwd)/data":/app/data \
   -v "$(pwd)/audio":/app/audio \
   -v "$(pwd)/logs":/app/logs \
-  docker.io/Lowara1243/speech-bot:latest
+  docker.io/lowara1243/speech-bot:latest
 ```
 > **For Windows users:** In Command Prompt, replace `$(pwd)` with `%cd%`. In PowerShell, you can use `${PWD}`.
 
