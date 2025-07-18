@@ -1,0 +1,7 @@
+aiocron
+aiogram
+aiohttp
+aiofiles
+python-dotenv
+openai-whisper
+loguru
