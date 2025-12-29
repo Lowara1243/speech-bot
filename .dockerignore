@@ -1,19 +1,25 @@
+# Git
 .git
 .gitignore
 
+# IDEs
 .vscode/
 .idea/
 
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+.venv/
 venv/
-*.venv
 env/
 
-**/__pycache__/
-*.pyc
-
+# Project Data (ignored during build)
+data/
 .env
 *.env.*
 
-data/
-audio/
-logs/
+# Note: pyproject.toml and uv.lock are NOT ignored here 
+# because they are needed for the Docker build.

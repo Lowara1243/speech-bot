@@ -1,23 +1,25 @@
 import os
 import html
+import asyncio
 from aiogram import Bot, F, Router
 from aiogram.types import Message
-from core.database import get_user, add_user, update_remaining_time
-from utils.speech_to_text import transcribe_audio
-from core.config import ADMIN_ID, UPDATE_TIME_POLICY, TELEGRAM_MSG_LIMIT
-from core.logger import logger
-from utils.text_utils import split_text
+from src.speech_bot.core.database import Database
+from src.speech_bot.utils.speech_to_text import transcribe_audio
+from src.speech_bot.core.config import ADMIN_ID, UPDATE_TIME_POLICY, TELEGRAM_MSG_LIMIT, DATA_DIR
+from src.speech_bot.core.logger import logger
+from src.speech_bot.utils.text_utils import split_text
 
 audio_router = Router()
+
 
 @audio_router.message(F.voice | F.audio)
 async def handle_audio_or_voice(message: Message, bot: Bot):
     user_id = message.from_user.id
-    user = get_user(user_id)
+    user = await Database.get_user(user_id)
 
     if user is None:
-        add_user(user_id)
-        user = get_user(user_id)
+        await Database.add_user(user_id)
+        user = await Database.get_user(user_id)
         logger.info("Новый пользователь {} добавлен в базу при отправке аудио.", user_id)
 
     is_admin = user[1] == ADMIN_ID
@@ -30,14 +32,17 @@ async def handle_audio_or_voice(message: Message, bot: Bot):
 
     if not is_admin and UPDATE_TIME_POLICY == "BEFORE":
         new_remaining_time = user[2] - audio_duration
-        update_remaining_time(user_id, new_remaining_time)
-        logger.info("Списано {} сек. у {}. Политика: BEFORE. Осталось: {}.", audio_duration, user_id, new_remaining_time)
+        await Database.update_remaining_time(user_id, new_remaining_time)
+        logger.info(
+            "Списано {} сек. у {}. Политика: BEFORE. Осталось: {}.", audio_duration, user_id, new_remaining_time
+        )
         user = (user[0], user[1], new_remaining_time)
 
     file_id = audio.file_id
-    temp_audio_path = f"audio/{file_id}.ogg"
+    temp_audio_dir = os.path.join(DATA_DIR, "audio")
+    temp_audio_path = os.path.join(temp_audio_dir, f"{file_id}.ogg")
     # Ensure the directory exists
-    os.makedirs("audio", exist_ok=True)
+    os.makedirs(temp_audio_dir, exist_ok=True)
 
     try:
         await bot.download(file=file_id, destination=temp_audio_path)
@@ -48,7 +53,8 @@ async def handle_audio_or_voice(message: Message, bot: Bot):
 
     try:
         msg = await message.reply("⏳ Ваше аудио в обработке, пожалуйста, подождите...")
-        recognized_text = transcribe_audio(temp_audio_path)
+        # Non-blocking transcription
+        recognized_text = await asyncio.to_thread(transcribe_audio, temp_audio_path)
 
         if recognized_text is None:
             await msg.edit_text("Произошла внутренняя ошибка во время распознавания речи.")
@@ -81,5 +87,5 @@ async def handle_audio_or_voice(message: Message, bot: Bot):
 
     if not is_admin and UPDATE_TIME_POLICY == "AFTER":
         new_remaining_time = user[2] - audio_duration
-        update_remaining_time(user_id, new_remaining_time)
+        await Database.update_remaining_time(user_id, new_remaining_time)
         logger.info("Списано {} сек. у {}. Политика: AFTER. Осталось: {}.", audio_duration, user_id, new_remaining_time)

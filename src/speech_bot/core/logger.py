@@ -1,5 +1,7 @@
 import sys
+import os
 from loguru import logger
+from src.speech_bot.core.config import DATA_DIR
 
 logger.remove()
 
@@ -12,8 +14,9 @@ logger.add(
 )
 
 # Log file
+log_file = os.path.join(DATA_DIR, "logs", "bot_activity.log")
 logger.add(
-    "logs/bot_activity.log",
+    log_file,
     level="ERROR",
     rotation="10 MB",
     retention="14 days",

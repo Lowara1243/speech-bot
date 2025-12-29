@@ -6,8 +6,10 @@ load_dotenv()
 DATA_DIR = "data"
 
 BOT_TOKEN = os.getenv("BOT_TOKEN")
+if not BOT_TOKEN:
+    raise ValueError("BOT_TOKEN не найден в .env")
 
-ADMIN_ID = int(os.getenv("ADMIN_ID"))
+ADMIN_ID = int(os.getenv("ADMIN_ID", 0))
 DB_FILENAME = os.getenv("DB_FILENAME", "users.db")
 DATABASE_PATH = os.path.join(DATA_DIR, DB_FILENAME)
 MODEL_NAME = os.getenv("MODEL_NAME", "base")

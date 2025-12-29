@@ -1,7 +1,7 @@
 import torch
 import whisper
-from core.config import MODEL_NAME, TRANSCRIPTION_DEVICE
-from core.logger import logger
+from src.speech_bot.core.config import MODEL_NAME, TRANSCRIPTION_DEVICE
+from src.speech_bot.core.logger import logger
 
 use_gpu = TRANSCRIPTION_DEVICE == "GPU"
 if use_gpu and not torch.cuda.is_available():
@@ -10,7 +10,7 @@ if use_gpu and not torch.cuda.is_available():
 else:
     device = "cuda" if use_gpu else "cpu"
 
-use_fp16 = (device == "cuda")
+use_fp16 = device == "cuda"
 
 logger.info(f"Настройки транскрибации: Устройство='{device}', Использовать FP16='{use_fp16}'.")
 
@@ -21,6 +21,7 @@ try:
 except Exception:
     logger.exception("КРИТИЧЕСКАЯ ОШИБКА: Не удалось загрузить модель Whisper. Бот не сможет обрабатывать аудио.")
     model = None
+
 
 def transcribe_audio(audio_path: str) -> str | None:
     if model is None:
