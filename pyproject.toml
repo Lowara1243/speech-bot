@@ -1,0 +1,25 @@
+[project]
+name = "speech-bot"
+version = "1.1.0"
+description = "Telegram Speech-to-Text Bot using OpenAI Whisper"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "aiocron>=1.8",
+    "aiogram>=3.12.0",
+    "aiosqlite>=0.21.0",
+    "aiohttp>=3.10.5",
+    "aiofiles>=24.1.0",
+    "python-dotenv>=1.0.1",
+    "openai-whisper>=20240930",
+    "loguru>=0.7.2",
+]
+
+[project.optional-dependencies]
+dev = [
+    "ruff>=0.6.4",
+]
+
+[tool.ruff]
+line-length = 120
+target-version = "py310"

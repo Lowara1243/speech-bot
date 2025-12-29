@@ -1,30 +1,29 @@
-FROM python:3.10-slim AS builder
+FROM docker.io/library/python:3.10-slim AS builder
 
 WORKDIR /app
-COPY requirements.txt .
+
+COPY pyproject.toml .
+COPY src/ src/
 
 RUN pip install --no-cache-dir uv && \
-    uv pip install --system --no-cache -r requirements.txt
+    uv pip install --system --no-cache .
 
 
-FROM python:3.10-slim
+FROM docker.io/library/python:3.10-slim
+
+ENV PYTHONUNBUFFERED=1 \
+    PYTHONDONTWRITEBYTECODE=1
 
 RUN apt-get update && \
-    apt-get install -y --no-install-recommends ffmpeg && \
-    rm -rf /var/lib/apt/lists/*
-
+    apt-get install -y --no-install-recommends \
+    ffmpeg \
+    && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
 
+ENV PYTHONPATH=/app
+
 COPY --from=builder /usr/local/lib/python3.10/site-packages/ /usr/local/lib/python3.10/site-packages/
+COPY src/ src/
 
-COPY main.py .
-COPY core/ ./core/
-COPY handlers/ ./handlers/
-COPY utils/ ./utils/
-
-VOLUME /app/audio
-VOLUME /app/data
-VOLUME /app/logs
-
-CMD ["python", "main.py"]
+CMD ["python", "-m", "src.speech_bot.main"]

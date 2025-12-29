@@ -1,0 +1,14 @@
+services:
+  speech-bot:
+    build: .
+    image: lowara1243/speech-bot:1.1.0
+    container_name: telegram_speech_bot
+    restart: always
+    env_file:
+      - .env
+    volumes:
+      - ./data:/app/data
+    tty: true
+    dns:
+      - 8.8.8.8
+      - 1.1.1.1
