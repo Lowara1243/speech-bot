@@ -1,138 +1,116 @@
 [English](README.md) | [Русский](README.ru.md)
 ---
 
-# Speech-to-Text Telegram Bot
+# Telegram Speech-to-Text Bot
 
-A Telegram bot that uses the OpenAI Whisper model to convert voice messages and audio files into text.
+<p align="center">
+  <a href="https://github.com/Lowara1243/speech-bot/actions/workflows/ci.yml"><img alt="CI Status" src="https://github.com/Lowara1243/speech-bot/actions/workflows/ci.yml/badge.svg"></a>
+  <a href="https://github.com/Lowara1243/speech-bot/blob/main/LICENSE"><img alt="License" src="https://img.shields.io/github/license/Lowara1243/speech-bot"></a>
+  <a href="https://www.python.org/downloads/"><img src="https://img.shields.io/badge/python-3.10+-blue.svg" alt="Python version"></a>
+  <a href="https://github.com/astral-sh/ruff"><img src="https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json" alt="Formatted with Ruff"></a>
+</p>
+
+A powerful Telegram bot that uses OpenAI Whisper to transcribe audio files and voice messages into text. Built with Aiogram 3, asynchronous processing, and packaged for easy deployment with Docker.
+
+---
 
 ## Table of Contents
-- [Features](#features)
-- [Quick Start (Docker)](#quick-start-docker)
-- [Installation from Source](#installation-from-source)
-- [Configuration](#configuration)
-- [Bot Management](#bot-management)
+- [Highlights](#-highlights)
+- [Quick Start (Docker Compose)](#-quick-start-docker-compose)
+- [Installation from Source](#-installation-from-source)
+- [Configuration](#-configuration)
+- [Bot Management](#-bot-management)
+- [License](#-license)
 
-## Features
+## ✨ Highlights
 
--   Transcribes speech from voice messages.
--   Flexible limits system (daily, weekly, monthly).
--   Configurable processing device (`CPU`/`GPU`).
--   Ready for deployment with Docker.
+-   **🎙️ High-Quality Transcription:** Uses OpenAI's Whisper model for accurate speech-to-text.
+-   **⚡️ Asynchronous:** Built on `asyncio` and `aiogram` for high performance.
+-   **💾 Persistent Storage:** Uses SQLite to store user data and usage limits.
+-   **⚙️ Flexible Limits System:** Configure daily, weekly, or monthly usage limits (in seconds).
+-   **🐳 Docker-Ready:** Optimized for one-command deployment using Docker Compose.
+-   **🔧 Modern Tooling:** Uses `uv` for package management and `ruff` for linting.
 
-## Quick Start (Docker)
+## 🚀 Quick Start (Docker Compose)
 
-This is the recommended way for a fast and easy deployment.
+This is the recommended way to run the bot for production.
 
-**1. Prepare your environment**
+1.  **Create a Project Directory:**
+    Create a new directory and navigate into it.
 
-Create the necessary directories and a `.env` configuration file:
+2.  **Create `docker-compose.yml`:**
+    ```yaml
+    services:
+      speech-bot:
+        image: lowara1243/speech-bot:1.1.0
+        container_name: telegram_speech_bot
+        restart: always
+        env_file:
+          - .env
+        volumes:
+          - ./data:/app/data
+        tty: true
+    ```
 
-```bash
-mkdir -p data audio logs && touch .env
-```
+3.  **Configure the Bot:**
+    Create a `.env` file in the same directory. At a minimum, you must provide your `BOT_TOKEN` and `ADMIN_ID`.
 
-**2. Configure `.env`**
+4.  **Run the Bot:**
+    ```bash
+    docker-compose up -d
+    ```
 
-Copy the content below into your `.env` file and **replace the values for `BOT_TOKEN` and `ADMIN_ID`**.
-
-```env
-# Required variables
-BOT_TOKEN=12345:your_telegram_bot_token_here
-ADMIN_ID=123456789
-
-# Optional variables (defaults are fine)
-DB_FILENAME=users.db
-MODEL_NAME=base
-TRANSCRIPTION_DEVICE=cpu
-UPDATE_TIME_POLICY=AFTER
-RESET_SCHEDULE=DAILY
-LOG_LEVEL=INFO
-```
-> For a detailed description of all variables, see the [Configuration](#configuration) section.
-
-**3. Run the container**
-
-Execute this command in the same directory where your `.env` file is located:
-
-```bash
-docker run -d \
-  --name speech-bot \
-  --rm \
-  --env-file .env \
-  -v "$(pwd)/data":/app/data \
-  -v "$(pwd)/audio":/app/audio \
-  -v "$(pwd)/logs":/app/logs \
-  docker.io/lowara1243/speech-bot:latest
-```
-> **For Windows users:** In Command Prompt, replace `$(pwd)` with `%cd%`. In PowerShell, you can use `${PWD}`.
-
-**The bot is now running!**
-
-## Installation from Source
+## 🛠️ Installation from Source
 
 <details>
-<summary>Click to expand instructions for manual installation</summary>
+<summary>Click to expand for manual installation instructions</summary>
 
-This method is suitable for development or if you prefer not to use Docker.
-
-**1. Clone the repository**
-```bash
-git clone https://github.com/Lowara1243/speech-bot.git
-cd speech-bot
-```
-
-**2. Create a virtual environment and install dependencies**
-
-Choose one of the following methods:
-
-*   **Using `uv` (recommended):**
+1.  **Clone the Repository:**
     ```bash
-    # This will create a .venv and install dependencies
-    uv pip install -r requirements.txt
-    ```
-*   **Using `pip`:**
-    ```bash
-    python -m venv venv
-    pip install -r requirements.txt
+    git clone https://github.com/Lowara1243/speech-bot.git
+    cd speech-bot
     ```
 
-**3. Activate the environment**
+2.  **Install Dependencies:**
+    You will need `ffmpeg` installed on your system.
+    -   **Ubuntu/Debian:** `sudo apt-get install ffmpeg`
+    -   **macOS:** `brew install ffmpeg`
 
-*   **macOS / Linux:** `source .venv/bin/activate` (or `venv/` if you used `pip`)
-*   **Windows:** `.venv\Scripts\activate` (or `venv\`)
+    # Will create .venv and install all dependencies from pyproject.toml
+    uv sync
+    ```
 
-**4. Configure environment variables**
+3.  **Configure the Bot:**
+    ```bash
+    cp .env.example .env
+    nano .env
+    ```
 
-Copy `.env.example` to `.env` and fill in your values.
-```bash
-cp .env.example .env
-```
-> For a description of all variables, see the [Configuration](#configuration) section.
+4.  **Run the Bot:**
+    ```bash
+    python -m src.speech_bot.main
+    ```
+    </details>
 
-**5. Run the bot**
-```bash
-python main.py
-```
+## ⚙️ Configuration
 
-</details>
+| Variable               | Description                                                                        | Required |
+|------------------------|------------------------------------------------------------------------------------|:--------:|
+| `BOT_TOKEN`            | Your Telegram bot token from [@BotFather](https://t.me/BotFather).  | **Yes**  |
+| `ADMIN_ID`             | Your personal Telegram User ID (admin has no limits).                              |    No    |
+| `DB_FILENAME`          | Filename for the SQLite database (defaults to `users.db`).                         |    No    |
+| `MODEL_NAME`           | Whisper model: `tiny`, `base`, `small`, `medium`, `large`, `turbo`.                |    No    |
+| `TRANSCRIPTION_DEVICE` | Processing device: `cpu` or `cuda`.                                                |    No    |
+| `UPDATE_TIME_POLICY`   | When to update limits: `BEFORE` or `AFTER` transcription.                          |    No    |
+| `RESET_SCHEDULE`       | Limit reset: `DAILY`, `WEEKLY`, `MONTHLY`.                                         |    No    |
+| `LOG_LEVEL`            | Logging level: `INFO`, `DEBUG`, `WARNING`, `ERROR`.                                |    No    |
 
-## Configuration
+## 🚦 Bot Management
 
-The bot is configured using environment variables (either in a `.env` file or passed directly).
+-   **View logs:** `docker-compose logs -f`
+-   **Stop the bot:** `docker-compose down`
+-   **Restart the bot:** `docker-compose restart`
 
-| Variable               | Description                                                                        | Default Value |
-|------------------------|------------------------------------------------------------------------------------|---------------|
-| `BOT_TOKEN`            | **(Required)** Your Telegram bot token from [@BotFather](https://t.me/BotFather).  | -             |
-| `ADMIN_ID`             | **(Required)** Your personal Telegram User ID. The admin user has unlimited usage. | -             |
-| `DB_FILENAME`          | The name of the SQLite database file. It will be created in the `data/` directory. | `users.db`    |
-| `MODEL_NAME`           | The Whisper model to use: `tiny`, `base`, `small`, `medium`, `large`, `turbo`.     | `base`        |
-| `TRANSCRIPTION_DEVICE` | The device for processing: `cpu` or `cuda` (`gpu`).                                | `cpu`         |
-| `UPDATE_TIME_POLICY`   | When to update used time: `BEFORE` or `AFTER` transcription.                       | `AFTER`       |
-| `RESET_SCHEDULE`       | How often to reset limits: `DAILY`, `WEEKLY`, `MONTHLY`.                           | `DAILY`       |
-| `LOG_LEVEL`            | Logging level: `INFO`, `DEBUG`, `WARNING`, `ERROR`.                                | `INFO`        |
+## 📄 License
 
-
-## Bot Management
-
-- **View logs (Docker):** `docker logs -f speech-bot`
-- **Stop the bot (Docker):** `docker stop speech-bot`
+This project is licensed under the MIT License.
